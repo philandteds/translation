@@ -49,6 +49,7 @@ $filename     =  $options['file'] !== null
 $data            = array();
 $allowedDatatyps = array(
 	'ezstring',
+	'eztext',
 	'ezxmltext'
 );
 foreach( $classes as $classIdentifier ) {
