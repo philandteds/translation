@@ -23,13 +23,14 @@ $script = eZScript::instance( $scriptSettings );
 $script->startup();
 $script->initialize();
 $options = $script->getOptions(
-	'[classes:][language:][parent_node_id:][file:]',
+	'[classes:][language:][parent_node_ids:][exclude_parent_node_ids:][file:]',
 	'',
  	array(
- 		'classes'        => 'List of content class identifiers (separated by comma)',
-	 	'language'       => 'Locale code which will be used for export (current local will be used by default)',
- 		'parent_node_id' => 'Parent node ID (it is 1 by default)',
- 		'file'           => 'File in which export results will be saved'
+ 		'classes'                 => 'List of content class identifiers (separated by comma)',
+	 	'language'                => 'Locale code which will be used for export (current local will be used by default)',
+ 		'parent_node_ids'         => 'List of parent node IDs (separated by comma)',
+ 		'exclude_parent_node_ids' => 'List of exclude parent node IDs (separated by comma)',
+ 		'file'                    => 'File in which export results will be saved'
 	 )
 );
 
@@ -39,12 +40,12 @@ if( count( $classes ) === 0 ) {
 	$script->shutdown( 1 );
 }
 
-$language     = $options['language'] !== null ? $options['language'] : eZLocale::currentLocaleCode();
-$parentNodeID = (int) $options['parent_node_id'] > 0 ? $options['parent_node_id'] : 1;
-$filename     =  $options['file'] !== null
+$language             = $options['language'] !== null ? $options['language'] : eZLocale::currentLocaleCode();
+$parentNodeIDs        = $options['parent_node_ids'] !== null ? explode( ',', $options['parent_node_ids'] ) : array( 1 );
+$excludeParentNodeIDs = $options['exclude_parent_node_ids'] !== null ? explode( ',', $options['exclude_parent_node_ids'] ) : array();
+$filename             = $options['file'] !== null
 	? $options['file']
 	: 'var/straker_export_' . $language . '_' . md5( rand() . '-' . microtime( true ) ). '.xml';
-
 
 $data            = array();
 $allowedDatatyps = array(
@@ -76,18 +77,29 @@ foreach( $classes as $classIdentifier ) {
 		}
 	}
 
-	$nodes = eZContentObjectTreeNode::subTreeByNodeID(
-	    array(
-	        'Depth'            => false,
-	        'Limitation'       => array(),
-	        'LoadDataMap'      => false,
-	        'AsObject'         => true,
-	        'ClassFilterType'  => 'include',
-	        'ClassFilterArray' => array( $class->attribute( 'identifier' ) ),
-	        'Language'         => $language
-	    ),
-	    $parentNodeID
-	);
+	$nodes       = array();
+	$fetchParams = array(
+        'Depth'            => false,
+        'Limitation'       => array(),
+        'LoadDataMap'      => false,
+        'AsObject'         => true,
+        'ClassFilterType'  => 'include',
+        'ClassFilterArray' => array( $class->attribute( 'identifier' ) ),
+        'Language'         => $language
+    );
+    if( count( $excludeParentNodeIDs ) > 0 ) {
+		$fetchParams['ExtendedAttributeFilter'] = array(
+			'id'     => 'exclude_parent_node_ids',
+			'params' => array( 'node_ids' => $excludeParentNodeIDs )
+		);
+	}
+
+	foreach( $parentNodeIDs as $parentNodeID ) {
+		$nodes = array_merge(
+			$nodes,
+			eZContentObjectTreeNode::subTreeByNodeID( $fetchParams, (int) trim( $parentNodeID ) )
+		);
+	}
 
 	foreach( $nodes as $node ) {
 		$object = $node->attribute( 'object' );
