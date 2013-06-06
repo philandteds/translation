@@ -23,30 +23,52 @@ $script = eZScript::instance( $scriptSettings );
 $script->startup();
 $script->initialize();
 $options = $script->getOptions(
-	'[classes:][language:][parent_node_ids:][exclude_parent_node_ids:][file:]',
+	'[classes:][language:][parent_node_ids:][exclude_parent_node_ids:][file:][export_handler:][target_language:]',
 	'',
  	array(
  		'classes'                 => 'List of content class identifiers (separated by comma)',
 	 	'language'                => 'Locale code which will be used for export (current local will be used by default)',
  		'parent_node_ids'         => 'List of parent node IDs (separated by comma)',
  		'exclude_parent_node_ids' => 'List of exclude parent node IDs (separated by comma)',
- 		'file'                    => 'File in which export results will be saved'
+ 		'file'                    => 'File in which export results will be saved',
+ 		'export_handler'          => 'Export handler (defualt value is StrakerExportHandler)',
+ 		'target_language'         => 'Target locale code (used only in XLIFF export handler, current local will be used by default)'
 	 )
 );
 
+// Checking classes
 $classes = $options['classes'] !== null ? explode( ',', $options['classes'] ) : array();
 if( count( $classes ) === 0 ) {
 	$cli->error( 'You should specify content class identifiers' );
 	$script->shutdown( 1 );
 }
 
+// Checking export handler
+$exportHandler        = $options['export_handler'] !== null ? $options['export_handler'] : 'StrakerExportHandler';
+$isWrongExportHandler = false;
+if( class_exists( $exportHandler ) === false ) {
+	$isWrongExportHandler = true;
+} else {
+	$reflector = new ReflectionClass( $exportHandler );
+	if( $reflector->isSubclassOf( 'TranslationExportHandler' ) === false ) {
+		$isWrongExportHandler = true;
+	}
+}
+if( $isWrongExportHandler ) {
+	$cli->error( '"' . $exportHandler . '" is not valid export handler' );
+	$script->shutdown( 1 );
+}
+
+// Checking the rest options
 $language             = $options['language'] !== null ? $options['language'] : eZLocale::currentLocaleCode();
 $parentNodeIDs        = $options['parent_node_ids'] !== null ? explode( ',', $options['parent_node_ids'] ) : array( 1 );
 $excludeParentNodeIDs = $options['exclude_parent_node_ids'] !== null ? explode( ',', $options['exclude_parent_node_ids'] ) : array();
 $filename             = $options['file'] !== null
 	? $options['file']
-	: 'var/straker_export_' . $language . '_' . md5( rand() . '-' . microtime( true ) ). '.xml';
+	: 'var/translation_export_' . $language . '_' . md5( rand() . '-' . microtime( true ) ). '.xml';
+$targetLanguage       = $options['target_language'] !== null ? $options['target_language'] : eZLocale::currentLocaleCode();
 
+// Collection the data
 $data            = array();
 $allowedDatatyps = array(
 	'ezstring',
@@ -110,13 +132,17 @@ foreach( $classes as $classIdentifier ) {
 		$dataMap          = $object->attribute( 'data_map' );
 		$objectAttriubtes = array();
 		foreach( $exportAttributes as $attributeIdentifier ) {
-			$objectAttriubtes[ $attributeIdentifier ] = $dataMap[ $attributeIdentifier ]->attribute( 'data_text' );
+			$objectAttriubtes[ $attributeIdentifier ] = array(
+				'type'    => $dataMap[ $attributeIdentifier ]->attribute( 'data_type_string' ),
+				'content' => $dataMap[ $attributeIdentifier ]->attribute( 'data_text' )
+			);
 		}
 
 		$data[] = array(
 			'id'               => $object->attribute( 'id' ),
 			'remote_id'        => $object->attribute( 'remote_id' ),
 			'class_identifier' => $class->attribute( 'identifier' ),
+			'name'             => $object->attribute( 'name' ),
 			'language'         => $object->attribute( 'current_language' ),
 			'attributes'       => $objectAttriubtes
 		);
@@ -131,30 +157,8 @@ $output      = 'Memory usage: ' . $memoryUsage . ' Mb';
 $cli->output( $output );
 $cli->output( 'Saving export results...' );
 
-$doc = new DOMDocument( '1.0', 'UTF-8' );
-$doc->formatOutput = true;
-
-$root = $doc->createElement( 'all' );
-$doc->appendChild( $root );
-
-foreach( $data as $item ) {
-	$entry = $doc->createElement( 'entry' );
-	$entry->setAttribute( 'id', $item['id'] );
-	$entry->setAttribute( 'remote_id', $item['remote_id'] );
-	$entry->setAttribute( 'type', $item['class_identifier'] );
-	$entry->setAttribute( 'language', $item['language'] );
-
-	foreach( $item['attributes'] as $identifier => $value ) {
-		$field = $doc->createElement( 'field' );
-		$field->setAttribute( 'name', $identifier );
-		$field->appendChild( $doc->createCDATASection( $value ) );
-		$entry->appendChild( $field );
-	}
-
-	$root->appendChild( $entry );
-}
-
-if( $doc->save( $filename ) === false ) {
+$callback = array( $exportHandler, 'save' );
+if( call_user_func( $callback, $data, $filename, $language, $targetLanguage ) === false ) {
 	$cli->error( 'Can not save "' . $filename . '" file' );
 } else {
 	$cli->output( 'Data is exported to "' . $filename . '" file' );
