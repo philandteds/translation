@@ -23,7 +23,7 @@ $script = eZScript::instance( $scriptSettings );
 $script->startup();
 $script->initialize();
 $options = $script->getOptions(
-	'[classes:][language:][parent_node_ids:][exclude_parent_node_ids:][file:][export_handler:][target_language:]',
+	'[classes:][language:][parent_node_ids:][exclude_parent_node_ids:][file:][export_handler:][target_language:][exclude_target_language]',
 	'',
  	array(
  		'classes'                 => 'List of content class identifiers (separated by comma)',
@@ -32,7 +32,8 @@ $options = $script->getOptions(
  		'exclude_parent_node_ids' => 'List of exclude parent node IDs (separated by comma)',
  		'file'                    => 'File in which export results will be saved',
  		'export_handler'          => 'Export handler (defualt value is StrakerExportHandler)',
- 		'target_language'         => 'Target locale code (used only in XLIFF export handler, current local will be used by default)'
+ 		'target_language'         => 'Target locale code (used only in XLIFF export handler, current local will be used by default)',
+ 		'exclude_target_language' => 'Exclude objects which source language is equal to target language (disabled by default)'
 	 )
 );
 
@@ -67,6 +68,7 @@ $filename             = $options['file'] !== null
 	? $options['file']
 	: 'var/translation_export_' . $language . '_' . md5( rand() . '-' . microtime( true ) ). '.xml';
 $targetLanguage       = $options['target_language'] !== null ? $options['target_language'] : eZLocale::currentLocaleCode();
+$excludeTargetLang    = $options['exclude_target_language'] === true;
 
 // Collection the data
 $data            = array();
@@ -136,6 +138,13 @@ foreach( $classes as $classIdentifier ) {
 				'type'    => $dataMap[ $attributeIdentifier ]->attribute( 'data_type_string' ),
 				'content' => $dataMap[ $attributeIdentifier ]->attribute( 'data_text' )
 			);
+		}
+
+		if(
+			$excludeTargetLang
+			&& $object->attribute( 'current_language' ) == $targetLanguage
+		) {
+			continue;
 		}
 
 		$data[] = array(
