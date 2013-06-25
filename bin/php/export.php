@@ -1,7 +1,7 @@
 #!/usr/bin/env php
 <?php
 /**
- * @package StrakerIntegration
+ * @package Translation
  * @author  Serhey Dolgushev <dolgushev.serhey@gmail.com>
  * @date    28 May 2012
  **/
