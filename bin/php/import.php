@@ -30,22 +30,24 @@ $script = eZScript::instance( $scriptSettings );
 $script->startup();
 $script->initialize();
 $options = $script->getOptions(
-	'[source_language:][target_language:][source_file:][import_handler:]',
+	'[source_language:][target_language:][source_file:][import_handler:][translation_creator_id:]',
 	'',
 	array(
-		'source_language'         => 'Source language',
-		'target_language'         => 'Target language',
-		'source_file'             => 'Source file, from which translations will be extracted',
-		'import_handler'          => 'Export handler (defualt value is XLIFFImportHandler)'
+		'source_language'        => 'Source language',
+		'target_language'        => 'Target language',
+		'source_file'            => 'Source file, from which translations will be extracted',
+		'import_handler'         => 'Export handler (defualt value is XLIFFImportHandler)',
+		'translation_creator_id' => 'User object ID behalf who translations will be created'
 	)
 );
 
 // Login as administrator to have rights to create new translations
-$ini           = eZINI::instance();
-$userCreatorID = $ini->variable( 'UserSettings', 'UserCreatorID' );
-$user          = eZUser::fetch( $userCreatorID );
+$userCreatorID = $options['translation_creator_id'] !== null
+	? (int) $options['translation_creator_id']
+	: eZINI::instance()->variable( 'UserSettings', 'UserCreatorID' ); 
+$user = eZUser::fetch( $userCreatorID );
 if( ( $user instanceof eZUser ) === false ) {
-	$cli->error( 'Cannot get user object by userID = "' . $userCreatorID . '". ( See site.ini [UserSettings].UserCreatorID )' );
+	$cli->error( 'Can not get user object by ID = "' . $userCreatorID . '"' );
 	$script->shutdown( 1 );
 }
 eZUser::setCurrentlyLoggedInUser( $user, $userCreatorID );
@@ -57,7 +59,7 @@ $params = array(
 	'source_file'     => null
 );
 foreach( $params as $key => $value ) {
-	if( $options[ $key ] === null) {
+	if( $options[ $key ] === null ) {
 		$cli->error( 'Please specify "' . $key . '" parameter' );
 		$script->shutdown( 1 );
 	}
