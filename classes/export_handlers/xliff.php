@@ -15,25 +15,25 @@ class XLIFFExportHandler extends TranslationExportHandler
 		$root = $doc->createElement( 'xliff' );
 		$root->setAttribute( 'version', '1.2' );
 		$root->setAttribute( 'xml:lang', $language );
+		$root->setAttribute( 'xmlns', 'urn:oasis:names:tc:xliff:document:1.2' );
 		$doc->appendChild( $root );
 
 		foreach( $data as $item ) {
 			$file = $doc->createElement( 'file' );
-			$file->setAttribute( 'tool-id', $item['id'] );
+			$file->setAttribute( 'original', $item['id'] );
 			$file->setAttribute( 'source-language', $item['language'] );
 			$file->setAttribute( 'target-language', $targetLanguage );
 			$file->setAttribute( 'datatype', 'database' );
-			$file->setAttribute( 'original', $item['name'] );
 			$root->appendChild( $file );
 
 			$body = $doc->createElement( 'body' );
 			$file->appendChild( $body );
 
 			foreach( $item['attributes'] as $identifier => $value ) {
-				$datatype = $value['type'] == 'ezxmltext' ? 'rcdata' : 'plaintext';
+				$datatype = $value['type'] == 'ezxmltext' ? 'rcdata' : 'string';
 
 				$unit = $doc->createElement( 'trans-unit' );
-				$unit->setAttribute( 'datatype', $datatype );
+				$unit->setAttribute( 'restype', $datatype );
 				$unit->setAttribute( 'id', $identifier );
 				$body->appendChild( $unit );
 
@@ -54,7 +54,7 @@ class XLIFFExportHandler extends TranslationExportHandler
 
 				$target = $doc->createElement( 'target' );
 				$target->setAttribute( 'xml:lang', $targetLanguage );
-				$target->setAttribute( 'state', 'need-translation' );
+				$target->setAttribute( 'state', 'needs-translation' );
 				$unit->appendChild( $target );
 			}
 		}
