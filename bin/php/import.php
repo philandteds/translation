@@ -30,21 +30,22 @@ $script = eZScript::instance( $scriptSettings );
 $script->startup();
 $script->initialize();
 $options = $script->getOptions(
-	'[source_language:][target_language:][source_file:][import_handler:][translation_creator_id:]',
+	'[source_language:][target_language:][source_file:][import_handler:][translation_creator_id:][default_attributes:]',
 	'',
 	array(
 		'source_language'        => 'Source language',
 		'target_language'        => 'Target language',
 		'source_file'            => 'Source file, from which translations will be extracted',
 		'import_handler'         => 'Export handler (defualt value is XLIFFImportHandler)',
-		'translation_creator_id' => 'User object ID behalf who translations will be created'
+		'translation_creator_id' => 'User object ID behalf who translations will be created',
+		'default_attributes'     => 'Attributes which will be copied from the source language'
 	)
 );
 
 // Login as administrator to have rights to create new translations
 $userCreatorID = $options['translation_creator_id'] !== null
 	? (int) $options['translation_creator_id']
-	: eZINI::instance()->variable( 'UserSettings', 'UserCreatorID' ); 
+	: eZINI::instance()->variable( 'UserSettings', 'UserCreatorID' );
 $user = eZUser::fetch( $userCreatorID );
 if( ( $user instanceof eZUser ) === false ) {
 	$cli->error( 'Can not get user object by ID = "' . $userCreatorID . '"' );
@@ -65,6 +66,11 @@ foreach( $params as $key => $value ) {
 	}
 
 	$params[ $key ] = $options[ $key ];
+}
+
+$defaultAttributes = 'all';
+if( isset( $options['default_attributes'] ) ) {
+	$defaultAttributes = $options['default_attributes'];
 }
 
 $targetLanguage = eZContentLanguage::fetchByLocale( $params['target_language'] );
@@ -112,8 +118,20 @@ foreach( $data as $item ) {
 		continue;
 	}
 
+	$defaultAttributeValues = array();
+	foreach( $object->attribute( 'data_map' ) as $identifier => $attr ) {
+		if(
+			$defaultAttributes === 'non-translatable'
+			&& (bool) $attr->attribute( 'contentclass_attribute' )->attribute( 'can_translate' )
+		) {
+			continue;
+		}
+
+		$defaultAttributeValues[ $identifier ] = $attr->toString();
+	}
+
 	$publishParams = array(
-		'attributes' => $item['attributes'],
+		'attributes' => array_merge( $defaultAttributeValues, $item['attributes'] ),
 		'language'   => $params['target_language']
 	);
 	if( eZContentFunctions::updateAndPublishObject( $object, $publishParams ) ) {
