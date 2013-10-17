@@ -62,14 +62,12 @@ if( $isWrongExportHandler ) {
 
 // Checking the rest options
 $language             = $options['language'] !== null ? $options['language'] : eZLocale::currentLocaleCode();
-$exportlanguage				= eZINI::instance( $language . '.ini' )->variable( 'HTTP', 'ContentLanguage' );
 $parentNodeIDs        = $options['parent_node_ids'] !== null ? explode( ',', $options['parent_node_ids'] ) : array( 1 );
 $excludeParentNodeIDs = $options['exclude_parent_node_ids'] !== null ? explode( ',', $options['exclude_parent_node_ids'] ) : array();
 $filename             = $options['file'] !== null
 	? $options['file']
 	: 'var/translation_export_' . $language . '_' . md5( rand() . '-' . microtime( true ) ). '.xml';
 $targetLanguage       = $options['target_language'] !== null ? $options['target_language'] : eZLocale::currentLocaleCode();
-$exportTargetlanguage	= eZINI::instance( $targetLanguage . '.ini' )->variable( 'HTTP', 'ContentLanguage' );
 $excludeTargetLang    = $options['exclude_target_language'] === true;
 
 // Collection the data
@@ -169,7 +167,7 @@ $cli->output( $output );
 $cli->output( 'Saving export results...' );
 
 $callback = array( $exportHandler, 'save' );
-if( call_user_func( $callback, $data, $filename, $exportlanguage, $exportTargetLanguage ) === false ) {
+if( call_user_func( $callback, $data, $filename, $language, $targetLanguage ) === false ) {
 	$cli->error( 'Can not save "' . $filename . '" file' );
 } else {
 	$cli->output( 'Data is exported to "' . $filename . '" file' );

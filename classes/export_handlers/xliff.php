@@ -9,6 +9,9 @@
 class XLIFFExportHandler extends TranslationExportHandler
 {
 	public static function save( array $data, $filename, $language, $targetLanguage ) {
+		$language       = self::getHTTPLanguageCode( $language );
+		$targetLanguage = self::getHTTPLanguageCode( $targetLanguage );
+
 		$doc = new DOMDocument( '1.0', 'UTF-8' );
 		$doc->formatOutput = true;
 
@@ -19,9 +22,10 @@ class XLIFFExportHandler extends TranslationExportHandler
 		$doc->appendChild( $root );
 
 		foreach( $data as $item ) {
+			$itemLanguage =
 			$file = $doc->createElement( 'file' );
 			$file->setAttribute( 'original', $item['id'] );
-			$file->setAttribute( 'source-language', $item['language'] );
+			$file->setAttribute( 'source-language', self::getHTTPLanguageCode( $item['language'] ) );
 			$file->setAttribute( 'target-language', $targetLanguage );
 			$file->setAttribute( 'datatype', 'database' );
 			$root->appendChild( $file );
@@ -38,7 +42,7 @@ class XLIFFExportHandler extends TranslationExportHandler
 				$body->appendChild( $unit );
 
 				$source = $doc->createElement( 'source' );
-				$source->setAttribute( 'xml:lang', $item['language'] );
+				$source->setAttribute( 'xml:lang', self::getHTTPLanguageCode( $item['language'] ) );
 				if( $value['type'] == 'ezxmltext' ) {
 					$doc->validate();
 					$source->appendChild( $doc->createCDATASection( $value['content'] ) );
@@ -60,5 +64,9 @@ class XLIFFExportHandler extends TranslationExportHandler
 		}
 
 		return $doc->save( $filename );
+	}
+
+	public static function getHTTPLanguageCode( $locale ) {
+		return eZINI::instance( $locale . '.ini', 'share/locale' )->variable( 'HTTP', 'ContentLanguage' );
 	}
 }
