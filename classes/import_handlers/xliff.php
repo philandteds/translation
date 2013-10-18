@@ -9,6 +9,9 @@
 class XLIFFImportHandler extends TranslationImportHandler
 {
 	public static function extractData( $sourceFile, $sourceLanguage, $targetLanguage ) {
+		$sourceLanguage = XLIFFExportHandler::getHTTPLanguageCode( $sourceLanguage );
+		$targetLanguage = XLIFFExportHandler::getHTTPLanguageCode( $targetLanguage );
+
 		$dom = new DOMDocument;
 		if(
 			file_exists( $sourceFile ) === false
