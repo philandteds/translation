@@ -44,6 +44,13 @@ class XLIFFImportHandler extends TranslationImportHandler
 				}
 
 				$value = $target->nodeValue;
+				if(
+					$attrTranslation->hasAttribute( 'restype' )
+					&& $attrTranslation->getAttribute( 'restype' ) === 'rcdata'
+				) {
+					$value = html_entity_decode( $value );
+					$value = str_replace( '&', '&amp;', $value );
+				}
 				if( strlen( $value ) === 0 ) {
 					continue;
 				}
