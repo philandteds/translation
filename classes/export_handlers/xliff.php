@@ -25,7 +25,7 @@ class XLIFFExportHandler extends TranslationExportHandler
 			$itemLanguage =
 			$file = $doc->createElement( 'file' );
 			$file->setAttribute( 'original', $item['id'] );
-			$file->setAttribute( 'source-language', self::getHTTPLanguageCode( $item['language'] ) );
+			$file->setAttribute( 'source-language', $language );
 			$file->setAttribute( 'target-language', $targetLanguage );
 			$file->setAttribute( 'datatype', 'database' );
 			$root->appendChild( $file );
@@ -42,7 +42,7 @@ class XLIFFExportHandler extends TranslationExportHandler
 				$body->appendChild( $unit );
 
 				$source = $doc->createElement( 'source' );
-				$source->setAttribute( 'xml:lang', self::getHTTPLanguageCode( $item['language'] ) );
+				$source->setAttribute( 'xml:lang', $language );
 				if( $value['type'] == 'ezxmltext' ) {
 					$doc->validate();
 					$source->appendChild( $doc->createCDATASection( $value['content'] ) );
