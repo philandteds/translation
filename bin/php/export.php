@@ -21,7 +21,7 @@ $scriptSettings['use-extensions'] = true;
 
 $script = eZScript::instance( $scriptSettings );
 $options = $script->getOptions(
-	'[classes:][language:][parent_node_ids:][exclude_parent_node_ids:][file:][export_handler:][target_language:][exclude_target_language][use_siteaccess_langueges]',
+	'[classes:][language:][parent_node_ids:][exclude_parent_node_ids:][file:][export_handler:][target_language:][exclude_target_language][use_siteaccess_languages]',
 	'',
  	array(
  		'classes'                  => 'List of content class identifiers (separated by comma)',
@@ -32,7 +32,7 @@ $options = $script->getOptions(
  		'export_handler'           => 'Export handler (defualt value is StrakerExportHandler)',
  		'target_language'          => 'Target locale code (used only in XLIFF export handler, current local will be used by default)',
  		'exclude_target_language'  => 'Exclude objects which source language is equal to target language (disabled by default)',
-		'use_siteaccess_langueges' => 'If this option is not set, only source language will be used to fetch content. Otherwise all languages of specified siteaccess will be used'
+		'use_siteaccess_languages' => 'If this option is not set, only source language will be used to fetch content. Otherwise all languages of specified siteaccess will be used'
 	 )
 );
 $script->initialize();
@@ -65,12 +65,12 @@ if( $isWrongExportHandler ) {
 $language               = $options['language'] !== null ? $options['language'] : eZLocale::currentLocaleCode();
 $parentNodeIDs          = $options['parent_node_ids'] !== null ? explode( ',', $options['parent_node_ids'] ) : array( 1 );
 $excludeParentNodeIDs   = $options['exclude_parent_node_ids'] !== null ? explode( ',', $options['exclude_parent_node_ids'] ) : array();
+$targetLanguage         = $options['target_language'] !== null ? $options['target_language'] : eZLocale::currentLocaleCode();
 $filename               = $options['file'] !== null
 	? $options['file']
-	: 'var/translation_export_' . $language . '_' . md5( rand() . '-' . microtime( true ) ). '.xml';
-$targetLanguage         = $options['target_language'] !== null ? $options['target_language'] : eZLocale::currentLocaleCode();
+	: 'var/translation_export_' . $targetLanguage . '_' . md5( rand() . '-' . microtime( true ) ). '.xlf';
 $excludeTargetLang      = $options['exclude_target_language'] === true;
-$useSiteaccessLangueges = $options['use_siteaccess_langueges'] === true;
+$useSiteaccessLanguages = $options['use_siteaccess_languages'] === true;
 
 // Collection the data
 $data            = array();
@@ -112,7 +112,7 @@ foreach( $classes as $classIdentifier ) {
         'ClassFilterType'  => 'include',
         'ClassFilterArray' => array( $class->attribute( 'identifier' ) )
     );
-	if( $useSiteaccessLangueges === false ) {
+	if( $useSiteaccessLanguages === false ) {
 		$fetchParams['Language'] = $language;
 	}
     if( count( $excludeParentNodeIDs ) > 0 ) {
