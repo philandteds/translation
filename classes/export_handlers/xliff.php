@@ -44,7 +44,7 @@ class XLIFFExportHandler extends TranslationExportHandler
 				$source = $doc->createElement( 'source' );
 				$source->setAttribute( 'xml:lang', $language );
 				if( $value['type'] == 'ezxmltext' ) {
-					$doc->validate();
+					@$doc->validate();
 					$source->appendChild( $doc->createCDATASection( $value['content'] ) );
 					/*
 					$fragment = $doc->createDocumentFragment();
