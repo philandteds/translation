@@ -18,7 +18,7 @@ form.job_list table td ul {margin-top: 0px;}
 		<div class="header-subline"></div>
 	</div></div></div></div></div></div>
 
-	<form class="job_list" name="jobs_list" action="{'export_translations/list'|ezurl( 'no' )}" method="post" onsubmit="return confirm('{'Do you really want to remove selected records?'|i18n( 'extension/translation' )}');">
+	<form class="job_list" name="jobs_list" action="{'export_translations/list'|ezurl( 'no' )}" method="post">
 		<div class="box-ml"><div class="box-mr"><div class="box-content">
 			{if $jobs|count|gt( 0 )}
 				<table class="list" cellspacing="0" cellpadding="0">
@@ -91,7 +91,7 @@ form.job_list table td ul {margin-top: 0px;}
 		<div class="controlbar">
 			<div class="box-bc"><div class="box-ml"><div class="box-mr"><div class="box-tc"><div class="box-bl"><div class="box-br">
 				<div class="block">
-					{if $jobs|count|gt( 0 )}<input class="button" type="submit" name="RemoveButton" value="{'Remove selected'|i18n( 'extension/translation' )}" title="{'Remove selected'|i18n( 'extension/translation' )}">{/if}
+					{if $jobs|count|gt( 0 )}<input class="button" type="submit" name="RemoveButton" value="{'Remove selected'|i18n( 'extension/translation' )}" title="{'Remove selected'|i18n( 'extension/translation' )}" onclick="return confirm('{'Do you really want to remove selected records?'|i18n( 'extension/translation' )}');">{/if}
 					<input class="button" type="submit" name="NewButton" value="{'New export'|i18n( 'extension/translation' )}" title="{'Create new export'|i18n( 'extension/translation' )}">
 				</div>
 			</div></div></div></div></div></div>
