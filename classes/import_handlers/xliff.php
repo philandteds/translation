@@ -38,7 +38,7 @@ class XLIFFImportHandler extends TranslationImportHandler
 				$target = $target->item( 0 );
 				if(
 					$target->getAttribute( 'xml:lang' ) !== $targetLanguage
-					|| !in_array( $target->getAttribute( 'state' ), array('needs-review-adaptation','translated') )
+					|| !in_array( $target->getAttribute( 'state' ), array( 'needs-review-adaptation', 'translated' ) )
 				) {
 					continue;
 				}

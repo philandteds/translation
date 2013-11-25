@@ -6,23 +6,14 @@
  * @date    21 Nov 2013
  **/
 
-class TranslationExportJob extends eZPersistentObject
+class TranslationExportJob extends TranslationJob
 {
-	const STATUS_INITIALIZED = 1;
-	const STATUS_RUNNING     = 2;
-	const STATUS_COMPLETE    = 3;
-	const FILE_EXTENSION     = 'xlf';
-
 	private $cache = array(
 		'parent_nodes'         => null,
 		'exclude_parent_nodes' => null,
 		'classes'              => null,
 		'creator'              => null
 	);
-
-	public function __construct( $row = array() ) {
-		$this->eZPersistentObject( $row );
-	}
 
 	public static function definition() {
 		return array(
@@ -69,7 +60,6 @@ class TranslationExportJob extends eZPersistentObject
 					'default'  => null,
 					'required' => true
 				),
-
 				'creator_id' => array(
 					'name'     => 'CreatorID',
 					'datatype' => 'integer',
@@ -98,22 +88,6 @@ class TranslationExportJob extends eZPersistentObject
 			'class_name'          => __CLASS__,
 			'name'                => 'translation_export_jobs'
 		);
-	}
-
-	public function getStatusString() {
-		$status = 'Unknown';
-		switch( $this->attribute( 'status' ) ) {
-			case self::STATUS_INITIALIZED:
-				$status = 'Initialized';
-				break;
-			case self::STATUS_RUNNING:
-				$status = 'Running';
-				break;
-			case self::STATUS_COMPLETE:
-				$status = 'Compete';
-				break;
-		}
-		return ezpI18n::tr( 'extension/translation', $status );
 	}
 
 	public function getParentNodes() {
@@ -179,25 +153,6 @@ class TranslationExportJob extends eZPersistentObject
 		}
 
 		return $this->cache['creator'];
-	}
-
-	public static function fetch( $id ) {
-		return eZPersistentObject::fetchObject(
-			self::definition(),
-			null,
-			array( 'id' => $id ),
-			true
-		);
-	}
-
-	public static function fetchList( $conditions = null, $limitations = null ) {
-		return eZPersistentObject::fetchObjectList(
-			self::definition(),
-			null,
-			$conditions,
-			null,
-			$limitations
-		);
 	}
 
 	public function addParentNodes( array $nodeIDs ) {
@@ -278,6 +233,7 @@ class TranslationExportJob extends eZPersistentObject
 		$command = 'php extension/translation/bin/php/export.php';
 		$command .= ' -s ' . $this->attribute( 'siteaccess' );
 		$command .= ' --use_siteaccess_languages';
+		$command .= ' --exclude_target_language';
 		$command .= ' --language=' . $this->attribute( 'siteaccess_language' );
 		$command .= ' --target_language=' . $this->attribute( 'siteaccess_language' );
 		$command .= ' --classes=' . $this->attribute( 'classes' );
@@ -299,19 +255,7 @@ class TranslationExportJob extends eZPersistentObject
 	}
 
 	public function sendNotification() {
-		$ini       = eZINI::instance( 'translation.ini' );
-		$receivers = (array) $ini->variable( 'General', 'NotificationsReceivers' );
-		$creator   = $this->attribute( 'creator' );
-		if( $creator instanceof eZContentObject ) {
-			$dataMap = $creator->attribute( 'data_map' );
-			if( isset( $dataMap['user_account'] ) ) {
-				$user = $dataMap['user_account']->attribute( 'content' );
-				if( $user instanceof eZUser ) {
-					$receivers[] = $user->attribute( 'email' );
-					$receivers   = array_unique( $receivers );
-				}
-			}
-		}
+		$receivers = $this->getNotificationReceivers();
 		if( count( $receivers ) === 0 ) {
 			return false;
 		}
@@ -334,27 +278,6 @@ class TranslationExportJob extends eZPersistentObject
 		}
 
 		eZMailTransport::send( $mail );
-	}
-
-	public function download() {
-		$path = self::getStorageDir() . '/' . $this->attribute( 'file' );
-
-		eZSession::stop();
-		ob_end_clean();
-
-		eZFile::downloadHeaders(
-			$path,
-			true,
-			$this->attribute( 'file' )
-		);
-		readfile( $path );
-		eZExecution::cleanExit();
-	}
-
-	public function remove( $conditions = null, $extraConditions = null ) {
-		@unlink( $this->attribute( 'file' ) );
-
-		parent::remove( $conditions, $extraConditions );
 	}
 
 	public static function getAllContentClasses() {
@@ -393,13 +316,6 @@ class TranslationExportJob extends eZPersistentObject
 	}
 
 	public static function getStorageDir() {
-		return eZINI::instance( 'translation.ini' )->variable( 'General', 'StorageDir' );
-	}
-
-	public static function checkStorageDir() {
-		$dir = self::getStorageDir();
-		if( file_exists( $dir ) === false ) {
-			@mkdir( $dir, 0777, true );
-		}
+		return eZINI::instance( 'translation.ini' )->variable( 'General', 'ExportStorageDir' );
 	}
 }

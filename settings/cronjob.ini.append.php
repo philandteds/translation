@@ -6,4 +6,5 @@ Scripts[]=export_translations.php
 
 [CronjobPart-frequent]
 Scripts[]=export_translations.php
+Scripts[]=import_translations.php
 */ ?>

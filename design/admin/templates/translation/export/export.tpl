@@ -1,8 +1,8 @@
-{if $erros|count|gt( 0 )}
+{if $errors|count|gt( 0 )}
 <div class="message-error">
 	<h2><span class="time">[{currentdate()|l10n( shortdatetime )}]</span> {'Following errors occurred:'|i18n( 'extension/translation' )}</h2>
 	<ul>
-		{foreach $erros as $error}
+		{foreach $errors as $error}
 		<li>{$error}</li>
 		{/foreach}
 	</ul>

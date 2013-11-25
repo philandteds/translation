@@ -12,12 +12,7 @@ if( $module->isCurrentAction( 'New' ) ) {
 	return $module->redirectToView( 'export' );
 } elseif ( $module->isCurrentAction( 'Remove' ) ) {
 	$jobIDs = (array) eZHTTPTool::instance()->postVariable( 'JobIDs', array() );
-	foreach( $jobIDs as $jobID ) {
-		$job = TranslationExportJob::fetch( $jobID );
-		if( $job instanceof TranslationExportJob ) {
-			$job->remove();
-		}
-	}
+	TranslationExportJob::removeList( $jobIDs );
 }
 
 $tpl = eZTemplate::factory();

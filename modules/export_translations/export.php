@@ -100,7 +100,7 @@ $tpl = eZTemplate::factory();
 $tpl->setVariable( 'classes', $classes );
 $tpl->setVariable( 'siteaccesses', $siteAccesses );
 $tpl->setVariable( 'job', $exportJob );
-$tpl->setVariable( 'erros', $errors );
+$tpl->setVariable( 'errors', $errors );
 
 $Result = array();
 $Result['navigation_part'] = eZINI::instance( 'translation.ini' )->variable( 'NavigationParts', 'Export' );
