@@ -27,7 +27,7 @@ class TranslationJob extends eZPersistentObject
 				$status = 'Running';
 				break;
 			case self::STATUS_COMPLETE:
-				$status = 'Compete';
+				$status = 'Complete';
 				break;
 		}
 		return ezpI18n::tr( 'extension/translation', $status );
