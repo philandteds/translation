@@ -105,11 +105,12 @@ class TranslationImportJob extends TranslationJob
 
 		// Run CLI script
 		$dir = self::getStorageDir();
+		$ini = eZINI::instance( 'translation.ini' );
 		$command = 'php extension/translation/bin/php/import.php';
 		$command .= ' --source_language=' . $this->attribute( 'language' );
 		$command .= ' --target_language=' . $this->attribute( 'language' );
 		$command .= ' --source_file="' . $dir . '/' . $this->attribute( 'file' ) . '"';
-		$command .= ' --import_handler=XLIFFImportHandler';
+		$command .= ' --import_handler=' . $ini->variable( 'General', 'ImportHandler' );
 		$command .= ' --translation_creator_id=' . $this->attribute( 'creator_id' );
 		$command .= ' --default_attributes=all';
 		exec( $command );
