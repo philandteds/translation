@@ -10,17 +10,19 @@ class XLIFFImportHandlerMonolingual extends XLIFFImportHandler
 {
 	protected static function processTransUnit( $transUnit, $sourceLanguage, $targetLanguage ) {
 		$source = $transUnit->getElementsByTagName( 'source' );
+		$target = $transUnit->getElementsByTagName( 'target' );
 		if( (int) $source->length  === 0 ) {
 			return null;
 		}
 
-		$source = $source->item( 0 );
-		if( $source->getAttribute( 'xml:lang' ) !== $sourceLanguage ) {
+		$target = $target->item( 0 );
+		if( $target->getAttribute( 'xml:lang' ) !== $targetLanguage ) {
 			return null;
 		}
 
-		$value = $source->nodeValue;
-		$value = self::fixAmpersand( $transUnit, $value );
+		$source = $source->item( 0 );
+		$value  = $source->nodeValue;
+		$value  = self::fixAmpersand( $transUnit, $value );
 
 		return $value;
 	}
