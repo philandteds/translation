@@ -61,8 +61,8 @@
     				<label>{'Language'|i18n( 'extension/pt' )}:</label>
 					<select name="new_job[siteaccess]">
 						<option value="">{'- Please select -'|i18n( 'extension/translation' )}</option>
-						{foreach $siteaccesses as $siteaccess => $locale}
-						<option value="{$siteaccess}"{if eq( $siteaccess, $job.siteaccess )} selected="selected"{/if}>{$siteaccess} ({$locale})</option>
+						{foreach $siteaccesses as $siteaccess => $language}
+						<option value="{$siteaccess}"{if eq( $siteaccess, $job.siteaccess )} selected="selected"{/if}>{if $language}{$language}{else}{$siteaccess}{/if}</option>
 						{/foreach}
 					</select>
 				</div>

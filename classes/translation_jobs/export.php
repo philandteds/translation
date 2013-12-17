@@ -142,8 +142,9 @@ class TranslationExportJob extends TranslationJob
 
 	public function getSiteAccessLanguage() {
 		$ini = eZINI::getSiteAccessIni( $this->attribute( 'siteaccess' ), 'site.ini' );
-		return $ini->hasVariable( 'RegionalSettings', 'Locale' )
-			? $ini->variable( 'RegionalSettings', 'Locale' )
+		$ini = eZINI::instance( $ini->variable( 'RegionalSettings', 'Locale' ) . '.ini', 'share/locale' );
+		return $ini->hasVariable( 'RegionalSettings', 'InternationalLanguageName' )
+			? $ini->variable( 'RegionalSettings', 'InternationalLanguageName' )
 			: null;
 	}
 
@@ -309,7 +310,12 @@ class TranslationExportJob extends TranslationJob
 			$locale = $ini->hasVariable( 'RegionalSettings', 'Locale' )
 				? $ini->variable( 'RegionalSettings', 'Locale' )
 				: null;
-			$return[ $siteAccess ] = $locale;
+
+			$ini      = eZINI::instance( $locale . '.ini', 'share/locale' );
+			$language = $ini->hasVariable( 'RegionalSettings', 'InternationalLanguageName' )
+				? $ini->variable( 'RegionalSettings', 'InternationalLanguageName' )
+				: null;
+			$return[ $siteAccess ] = $language;
 		}
 
 		return $return;

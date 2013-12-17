@@ -21,6 +21,11 @@ $ViewList = array(
 			'NewButton'    => 'New'
 		)
 	),
+	'clone' => array(
+		'functions' => array( 'export' ),
+		'script'    => 'clone.php',
+		'params'    => array( 'JobID' )
+	),
 	'export' => array(
 		'functions'           => array( 'export' ),
 		'script'              => 'export.php',

@@ -36,6 +36,7 @@ form.job_list table td ul {margin-top: 0px;}
 							<th>{'Language'|i18n( 'extension/translation' )}</th>
 							<th>{'Creator'|i18n( 'extension/translation' )}</th>
 							<th>{'Created'|i18n( 'extension/translation' )}</th>
+							<th>&nbsp;</th>
 						</tr>
 					</thead>
 					<tbody>
@@ -78,9 +79,10 @@ form.job_list table td ul {margin-top: 0px;}
 									</ul>
 								{/if}
 							</td>
-							<td>{$job.siteaccess} ({$job.siteaccess_language})</td>
+							<td>{if $job.siteaccess_language}{$job.siteaccess_language}{else}{$job.siteaccess}{/if}</td>
 							<td>{if $job.creator}<a href="{$job.creator.main_node.url_alias|ezurl( 'no' )}">{$job.creator.name}</a>{else}{'Creator is removed'|i18n( 'extension/translation' )}{/if}</td>
 							<td>{$job.created_at|datetime( 'custom', '%d.%m.%Y %H:%i:%s' )}</td>
+							<td><a href="{concat( 'export_translations/clone'|ezurl( 'no' ), '/', $job.id )}"><img src="{'share/icons/crystal-admin/16x16_original/mimetypes/txt2.png'|ezroot( 'no' )}" alt="{'Copy'|i18n( 'extension/translation' )}" /></a></td>
 						</tr>
 						{/foreach}
 					</tbody>
