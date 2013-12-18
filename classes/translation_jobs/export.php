@@ -80,6 +80,7 @@ class TranslationExportJob extends TranslationJob
 				'class_identifiers'    => 'getClassIdentifiers',
 				'content_classes'      => 'getContentClasses',
 				'siteaccess_language'  => 'getSiteAccessLanguage',
+				'siteaccess_locale'    => 'getSiteAccessLocale',
 				'creator'              => 'getCreator'
 			),
 			'keys'                => array( 'id' ),
@@ -141,10 +142,16 @@ class TranslationExportJob extends TranslationJob
 	}
 
 	public function getSiteAccessLanguage() {
-		$ini = eZINI::getSiteAccessIni( $this->attribute( 'siteaccess' ), 'site.ini' );
-		$ini = eZINI::instance( $ini->variable( 'RegionalSettings', 'Locale' ) . '.ini', 'share/locale' );
+		$ini = eZINI::instance( $this->attribute( 'siteaccess_locale' ) . '.ini', 'share/locale' );
 		return $ini->hasVariable( 'RegionalSettings', 'InternationalLanguageName' )
 			? $ini->variable( 'RegionalSettings', 'InternationalLanguageName' )
+			: null;
+	}
+
+	public function getSiteAccessLocale() {
+		$ini = eZINI::getSiteAccessIni( $this->attribute( 'siteaccess' ), 'site.ini' );
+		return $ini->hasVariable( 'RegionalSettings', 'Locale' )
+			? $ini->variable( 'RegionalSettings', 'Locale' )
 			: null;
 	}
 
@@ -235,10 +242,10 @@ class TranslationExportJob extends TranslationJob
 		$command .= ' -s ' . $this->attribute( 'siteaccess' );
 		$command .= ' --use_siteaccess_languages';
 		$command .= ' --exclude_target_language';
-		$command .= ' --language=' . $this->attribute( 'siteaccess_language' );
-		$command .= ' --target_language=' . $this->attribute( 'siteaccess_language' );
+		$command .= ' --language=' . $this->attribute( 'siteaccess_locale' );
+		$command .= ' --target_language=' . $this->attribute( 'siteaccess_locale' );
 		$command .= ' --classes=' . $this->attribute( 'classes' );
-		$command .= ' --file=' . $dir . '/' . $this->attribute( 'file' );
+		$command .= ' --file="' . $dir . '/' . $this->attribute( 'file' ) . '"';
 		$command .= ' --export_handler=XLIFFExportHandler';
 		if( strlen( $this->attribute( 'parent_node_ids' ) ) > 0 ) {
 			$command .= ' --parent_node_ids=' . $this->attribute( 'parent_node_ids' );

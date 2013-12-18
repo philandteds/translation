@@ -118,16 +118,50 @@ foreach( $data as $item ) {
 		continue;
 	}
 
+	$tmpFiles = array();
 	$defaultAttributeValues = array();
 	foreach( $object->attribute( 'data_map' ) as $identifier => $attr ) {
+		$clasAttr = $attr->attribute( 'contentclass_attribute' );
 		if(
 			$defaultAttributes === 'non-translatable'
-			&& (bool) $attr->attribute( 'contentclass_attribute' )->attribute( 'can_translate' )
+			&& (bool) $clasAttr->attribute( 'can_translate' )
 		) {
 			continue;
 		}
 
-		$defaultAttributeValues[ $identifier ] = $attr->toString();
+		if( $attr->attribute( 'has_content' ) == false ) {
+			continue;
+		}
+
+		$attrString = $attr->toString();
+		if( in_array( $clasAttr->attribute( 'data_type_string' ), array( 'ezmedia', 'ezbinaryfile' ) ) ) {
+			$tmp        = explode( '|', $attrString );
+			$file       = $tmp[0];
+			$attrString = TranslationImportJob::getStorageDir() . '/' . $tmp[1];
+
+			if(
+				file_exists( $file )
+				|| (int) @filesize( $file ) === 0
+			) {
+				eZClusterFileHandler::instance( $file )->fetch();
+			}
+			@copy( $file, $attrString );
+			$tmpFiles[] = $attrString;
+		}
+
+		if( in_array( $clasAttr->attribute( 'data_type_string' ), array( 'ezimage' ) ) ) {
+			$tmp  = explode( '|', $attrString );
+			$file = $tmp[0];
+
+			if(
+				file_exists( $file )
+				|| (int) @filesize( $file ) === 0
+			) {
+				eZClusterFileHandler::instance( $file )->fetch();
+			}
+		}
+
+		$defaultAttributeValues[ $identifier ] = $attrString;
 	}
 
 	$publishParams = array(
@@ -136,6 +170,9 @@ foreach( $data as $item ) {
 	);
 	if( eZContentFunctions::updateAndPublishObject( $object, $publishParams ) ) {
 		$counter++;
+	}
+	foreach( $tmpFiles as $file ) {
+		@unlink( $file );
 	}
 }
 
