@@ -22,7 +22,7 @@ class XLIFFImportHandlerMonolingual extends XLIFFImportHandler
 
 		$source = $source->item( 0 );
 		$value  = $source->nodeValue;
-		$value  = self::fixAmpersand( $transUnit, $value );
+		//$value  = self::fixAmpersand( $transUnit, $value );
 
 		return $value;
 	}
