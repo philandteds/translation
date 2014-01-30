@@ -22,6 +22,8 @@ class XLIFFImportHandlerMonolingual extends XLIFFImportHandler
 
 		$source = $source->item( 0 );
 		$value  = $source->nodeValue;
+		// Translations team changes space to &nbsp; in random order, it breaks ezxml
+		$value  = str_replace( '&nbsp;', ' ',  $value );
 		//$value  = self::fixAmpersand( $transUnit, $value );
 
 		return $value;
