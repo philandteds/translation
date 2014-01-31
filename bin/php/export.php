@@ -123,10 +123,22 @@ foreach( $classes as $classIdentifier ) {
 	}
 
 	foreach( $parentNodeIDs as $parentNodeID ) {
+		$parentNodeID = (int) trim( $parentNodeID );
+		$parentNode   = eZContentObjectTreeNode::fetch( $parentNodeID );
+
 		$nodes = array_merge(
 			$nodes,
-			eZContentObjectTreeNode::subTreeByNodeID( $fetchParams, (int) trim( $parentNodeID ) )
+			eZContentObjectTreeNode::subTreeByNodeID( $fetchParams, $parentNodeID )
 		);
+
+		// Include parent node
+		if(
+			$parentNode instanceof eZContentObjectTreeNode
+			&& $parentNode->attribute( 'class_identifier' ) == $classIdentifier
+		) {
+			$nodes = array_merge( $nodes, array( $parentNode ) );
+		}
+
 	}
 
 	foreach( $nodes as $node ) {
