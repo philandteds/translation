@@ -47,7 +47,7 @@
 					{/if}
 					<input class="button" type="submit" name="BrowseExcludeParentNodeButton" value="{'Add node'|i18n( 'extension/translation' )}" />
 				</div>
-				
+
 				<div class="block">
     				<label>{'Content classes'|i18n( 'extension/pt' )}</label>
 					<select name="new_job[classes][]" multiple="multiple" size="10">
@@ -55,6 +55,20 @@
 						<option value="{$class.identifier}"{if $job.class_identifiers|contains( $class.identifier )} selected="selected"{/if}>{$class.name|wash}</option>
 						{/foreach}
 					</select>
+				</div>
+
+				<div class="block">
+    				<label>{'Direct Nodes'|i18n( 'extension/translation' )}:</label>
+					{if $job.direct_nodes|count|eq( 0 )}
+						<p>{'No any nodes'|i18n( 'extension/translation' )}</p>
+					{else}
+						<ul>
+							{foreach $job.direct_nodes as $node}
+								<li>{include uri='design:translation/node_path.tpl' node=$node} <a href="{concat( 'export_translations/export'|ezurl( 'no' ), '?action=RemoveDirectNode&NodeID=', $node.node_id )}"><img src={'trash-icon-16x16.gif'|ezimage()} alt="{'Remove'|i18n( 'extension/translation' )}"/></a></li>
+							{/foreach}
+						</ul>
+					{/if}
+					<input class="button" type="submit" name="BrowseDirectNodeButton" value="{'Add node'|i18n( 'extension/translation' )}" />
 				</div>
 
 				<div class="block">
