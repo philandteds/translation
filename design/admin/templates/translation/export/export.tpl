@@ -47,7 +47,7 @@
 					{/if}
 					<input class="button" type="submit" name="BrowseExcludeParentNodeButton" value="{'Exclude subtree'|i18n( 'extension/translation' )}" />
 				</div>
-				
+
 				<div class="block">
     				<label>{'Content classes'|i18n( 'extension/pt' )}</label>
 					<select name="new_job[classes][]" multiple="multiple" size="10">

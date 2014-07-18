@@ -5,6 +5,7 @@ CREATE TABLE `translation_export_jobs` (
   `file` varchar(255) NOT NULL,
   `parent_node_ids` varchar(255) default NULL,
   `exclude_parent_node_ids` varchar(255) default NULL,
+  `direct_node_ids` varchar(255) default NULL,
   `classes` varchar(255) default NULL,
   `siteaccess` varchar(255) default NULL,
   `creator_id` int(11) unsigned NOT NULL,

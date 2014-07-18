@@ -32,6 +32,7 @@ form.job_list table td ul {margin-top: 0px;}
 							<th>{'Status'|i18n( 'extension/translation' )}</th>
 							<th>{'Subtrees'|i18n( 'extension/translation' )}</th>
 							<th>{'Exclude subtrees'|i18n( 'extension/translation' )}</th>
+                            <th>{'Direct nodes'|i18n( 'extension/translation' )}</th>
 							<th>{'Content classes'|i18n( 'extension/translation' )}</th>
 							<th>{'Language'|i18n( 'extension/translation' )}</th>
 							<th>{'Creator'|i18n( 'extension/translation' )}</th>
@@ -63,6 +64,17 @@ form.job_list table td ul {margin-top: 0px;}
 								{else}
 									<ul>
 										{foreach $job.exclude_parent_nodes as $node}
+											<li>{include uri='design:translation/node_path.tpl' node=$node}</li>
+										{/foreach}
+									</ul>
+								{/if}
+							</td>
+							<td>
+								{if $job.direct_nodes|count|eq( 0 )}
+									{'No any'|i18n( 'extension/translation' )}
+								{else}
+									<ul>
+										{foreach $job.direct_nodes as $node}
 											<li>{include uri='design:translation/node_path.tpl' node=$node}</li>
 										{/foreach}
 									</ul>
