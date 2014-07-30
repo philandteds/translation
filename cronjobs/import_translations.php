@@ -8,7 +8,7 @@
 ini_set( 'memory_limit', '512M' );
 
 $jobs = TranslationImportJob::fetchList(
-	array( 'status' => TranslationImportJob::STATUS_INITIALIZED )
+	//array( 'status' => TranslationImportJob::STATUS_INITIALIZED )
 );
 
 $cli->output( 'Processing ' . count( $jobs ) . ' import jobs' );
