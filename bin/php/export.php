@@ -69,6 +69,26 @@ $excludeTargetLang      = $options['exclude_target_language'] === true;
 $useSiteaccessLanguages = $options['use_siteaccess_languages'] === true;
 $directNodeIDs          = $options['direct_node_ids'] !== null ? explode(',', $options['direct_node_ids']) : array();
 
+// Exclude all locations for $excludeParentNodeIDs
+$tmp = $excludeParentNodeIDs;
+foreach( $tmp as $nodeID ) {
+    $node = eZContentObjectTreeNode::fetch( $nodeID );
+    if( $node instanceof eZContentObjectTreeNode === false ) {
+        continue;
+    }
+    
+    $object = $node->attribute( 'object' );
+    if( $object instanceof eZContentObject === false ) {
+        continue;
+    }
+    
+    $locations = $object->assignedNodes( false );
+    foreach( $locations as $location ) {
+        $excludeParentNodeIDs[] = $location['node_id'];
+    }
+}
+$excludeParentNodeIDs = array_unique( $excludeParentNodeIDs );
+
 // Collection the data
 $data = array();
 foreach ($classes as $classIdentifier) {
