@@ -42,6 +42,8 @@ class TranslationJob extends eZPersistentObject
 	public function download() {
 		$path = static::getStorageDir() . '/' . $this->attribute( 'file' );
 
+		eZClusterFileHandler::instance($path)->fetch();
+
 		eZSession::stop();
 		ob_end_clean();
 

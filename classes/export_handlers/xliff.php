@@ -63,7 +63,11 @@ class XLIFFExportHandler extends TranslationExportHandler
 			}
 		}
 
-		return $doc->save( $filename );
+        $xml = $doc->saveXML();
+        return eZClusterFileHandler::instance($filename)->storeContents($xml);
+//
+//
+//		return $doc->save( $filename );
 	}
 
 	public static function getHTTPLanguageCode( $locale ) {
